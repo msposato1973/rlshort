@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+     <Appenders>
+	    <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss,SSS Z} %p %c{1.} [cfg-%t] %m%n"/>
+	    </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.hibernate.validator.internal.util.Version" level="warn" />
+        <Logger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" />
+        <Logger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn" />
+        <Logger name="org.apache.catalina.startup.DigesterFactory" level="error" />
+        <Logger name="org.springframework.context" level="warn" />
+        <Logger name="org.thymeleaf" level="warn" />
+        <Logger name="org.hibernate" level="warn" />
+        <Logger name="org.hibernate.orm.deprecation" level="error" />
+        <Logger name="net.orfdev" level="debug" />
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
