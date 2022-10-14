@@ -1,11 +1,13 @@
 package net.orfdev;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,17 +49,16 @@ class UrlMappingsControllerTest {
     @Test
     public void testHello() throws Exception {
         String htmlReponse= "<!DOCTYPE HTML>\n<html>\n<head>\n    <title>Welcome</title>\n</head>\n<body>\n    <p>Hello <span>World</span></p>\n</body>\n</html>\n";
-        mvc.perform(MockMvcRequestBuilders.get("/"))
+        mvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo(htmlReponse)));
     }
-
 
     @Test
     public void testHelloSam() throws Exception {
         String htmlReponse= "<!DOCTYPE HTML>\n<html>\n<head>\n    <title>Welcome</title>\n</head>\n<body>\n    <p>Hello <span>Sam</span></p>\n</body>\n</html>\n";
 
-        mvc.perform(MockMvcRequestBuilders.get("/?who=Sam"))
+        mvc.perform(get("/?who=Sam"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo(htmlReponse)));
     }
@@ -69,7 +70,7 @@ class UrlMappingsControllerTest {
         String request= "/html/shorten?url=https://www.orpheussoftware.co.uk/about/90c2f90903g3q870debby21G31386g7e";
         String response= "<!DOCTYPE HTML>\n<html>\n<head>\n<title>Short URL</title>\n</head>\n<body>\n<p>Original URL:</p>\n<pre>https://www.orpheussoftware.co.uk/about/90c2f90903g3q870debby21G31386g7e</pre>\n<p>Short URL:</p>\n<pre>http://localhost:8080/6DxFPGmytbZ</pre>\n</body>\n</html>\n";
 
-        ResultActions resultActions =  mvc.perform(MockMvcRequestBuilders.get(request))
+        ResultActions resultActions =  mvc.perform(get(request))
                .andExpect(status().isOk());
 
 
@@ -101,14 +102,16 @@ class UrlMappingsControllerTest {
     //    "originalUrl": "https://www.orpheussoftware.co.uk/about/90c2f90903g3q870debby21G31386g7e"
     //}
 
-    @Test
-    public void testShorten() throws Exception {
-        String request= "json/shorten?url=https://www.orpheussoftware.co.uk/about/90c2f90903g3q870debby21G31386g7e";
-        String response= "{\n" +
-                "    \"shortUrl\": \"http://localhost:8080/2uKEUxwqONA\",\n" +
-                "    \"originalUrl\": \"https://www.orpheussoftware.co.uk/about/90c2f90903g3q870debby21G31386g7e\"\n" +
-        "}";
 
-        ;
+    @Test
+    public void testHealthCheckManagementURL() throws Exception {
+        MvcResult mvcResult = mvc.perform(get("/{shortUrl}/health","3zyFfgxPCMR"))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.recordCount").value(0))
+                .andReturn();
+
+        Assert.assertEquals(MediaType.APPLICATION_JSON_VALUE,
+                mvcResult.getResponse().getContentType());
     }
+
 }
