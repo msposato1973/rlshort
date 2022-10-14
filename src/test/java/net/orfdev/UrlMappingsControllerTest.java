@@ -105,7 +105,10 @@ class UrlMappingsControllerTest {
 
     @Test
     public void testHealthCheckManagementURL() throws Exception {
-        MvcResult mvcResult = mvc.perform(get("/{shortUrl}/health","3zyFfgxPCMR"))
+        String request = "/{shortUrl}/health";
+        String shortUrl = "3zyFfgxPCMR";
+
+        MvcResult mvcResult = mvc.perform(get(request,shortUrl))
                 .andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.recordCount").value(0))
                 .andReturn();
