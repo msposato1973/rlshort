@@ -1,7 +1,10 @@
 package net.orfdev;
 
+import static org.apache.logging.log4j.core.net.SslSocketManager.DEFAULT_PORT;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -31,8 +34,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { Application.class })
-@SpringBootTest
 @AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = DEFINED_PORT)
 class UrlMappingsControllerTest {
 
     @Autowired
@@ -43,24 +46,33 @@ class UrlMappingsControllerTest {
 
     @BeforeEach
     public void setup() throws Exception {
+
         this.mvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
     }
 
     @Test
     public void testHello() throws Exception {
         String htmlReponse= "<!DOCTYPE HTML>\n<html>\n<head>\n    <title>Welcome</title>\n</head>\n<body>\n    <p>Hello <span>World</span></p>\n</body>\n</html>\n";
-        mvc.perform(get("/"))
+        ResultActions resultActions =  this.mvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo(htmlReponse)));
+
+        MvcResult mvcResult = resultActions.andReturn();
+
+        Assert.assertNotNull(mvcResult.getResponse());
     }
 
     @Test
     public void testHelloSam() throws Exception {
         String htmlReponse= "<!DOCTYPE HTML>\n<html>\n<head>\n    <title>Welcome</title>\n</head>\n<body>\n    <p>Hello <span>Sam</span></p>\n</body>\n</html>\n";
 
-        mvc.perform(get("/?who=Sam"))
+        ResultActions resultActions =  this.mvc.perform(get("/?who=Sam"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(equalTo(htmlReponse)));
+
+        MvcResult mvcResult = resultActions.andReturn();
+
+        Assert.assertNotNull(mvcResult.getResponse());
     }
 
 
@@ -70,13 +82,15 @@ class UrlMappingsControllerTest {
         String request= "/html/shorten?url=https://www.orpheussoftware.co.uk/about/90c2f90903g3q870debby21G31386g7e";
         String response= "<!DOCTYPE HTML>\n<html>\n<head>\n<title>Short URL</title>\n</head>\n<body>\n<p>Original URL:</p>\n<pre>https://www.orpheussoftware.co.uk/about/90c2f90903g3q870debby21G31386g7e</pre>\n<p>Short URL:</p>\n<pre>http://localhost:8080/6DxFPGmytbZ</pre>\n</body>\n</html>\n";
 
-        ResultActions resultActions =  mvc.perform(get(request))
+        ResultActions resultActions =   this.mvc.perform(get(request))
                .andExpect(status().isOk());
 
 
 
         MvcResult mvcResult = resultActions.andReturn();
         String responseBody = mvcResult.getResponse().getContentAsString();
+
+        assertEquals("text/html;charset=UTF-8", mvcResult.getResponse().getContentType());
 
         String responseTitle = "<title>Short URL</title>";
         assertTrue(responseBody.contains(responseTitle));
@@ -108,11 +122,11 @@ class UrlMappingsControllerTest {
         String request = "/{shortUrl}/health";
         String shortUrl = "3zyFfgxPCMR";
 
-        MvcResult mvcResult = mvc.perform(get(request,shortUrl))
+        MvcResult mvcResult =  this.mvc.perform(get(request,shortUrl))
                 .andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.recordCount").value(0))
                 .andReturn();
-
+        assertEquals(MediaType.APPLICATION_JSON_VALUE, mvcResult.getResponse().getContentType());
         Assert.assertEquals(MediaType.APPLICATION_JSON_VALUE,
                 mvcResult.getResponse().getContentType());
     }
